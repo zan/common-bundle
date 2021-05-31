@@ -1,0 +1,19 @@
+{
+  "name": "zan/common-bundle",
+  "description": "Common code shared among many Symfony applications",
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Zan\\CommonBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Zan\\CommonBundle\\Tests\\": "tests/"
+    }
+  }
+}
