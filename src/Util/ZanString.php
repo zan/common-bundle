@@ -17,4 +17,17 @@ class ZanString
 
         return $string;
     }
+
+    /**
+     * Returns true if $haystack ends with $needle
+     */
+    public static function endsWith(?string $haystack, string $needle): bool
+    {
+        if (!$haystack) return false;
+
+        $strpos = strrpos($haystack, $needle);
+        if ($strpos === false) return false;
+
+        return (strrpos($haystack, $needle) === strlen($haystack) - strlen($needle));
+    }
 }

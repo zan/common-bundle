@@ -15,7 +15,9 @@ class ZanObject
      */
     public static function getMethods($object)
     {
-        $methods = array();
+        if (!$object) return [];
+
+        $methods = [];
 
         if ($object instanceof \ReflectionClass) {
             $refClass = $object;
