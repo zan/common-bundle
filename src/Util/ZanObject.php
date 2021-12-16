@@ -228,4 +228,28 @@ class ZanObject
 
         return false;
     }
+
+    /**
+     * @param $object
+     * @return \ReflectionParameter[]
+     * @throws \ReflectionException
+     */
+    public static function getRequiredConstructorArguments($object)
+    {
+        $class = new \ReflectionClass($object);
+        $constructor = $class->getConstructor();
+
+        /**
+         * Array of ...
+         */
+        $required = [];
+        foreach ($constructor->getParameters() as $parameter) {
+            // Only interested in required ones
+            if ($parameter->isOptional()) continue;
+
+            $required[] = $parameter;
+        }
+
+        return $required;
+    }
 }
