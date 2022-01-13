@@ -239,6 +239,9 @@ class ZanObject
         $class = new \ReflectionClass($object);
         $constructor = $class->getConstructor();
 
+        // Early exit if there isn't a constructor
+        if (!$constructor) return [];
+
         /**
          * Array of ...
          */
