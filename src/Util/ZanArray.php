@@ -9,6 +9,8 @@ class ZanArray
     /**
      * Similar to explode with support for handling things that may already be arrays or may be empty
      *
+     * All items are trimmed before being returned, unless an array is passed in
+     *
      * @param null|string|array<mixed> $str
      * @param non-empty-string $separator
      * @return array<string>
@@ -22,6 +24,11 @@ class ZanArray
         // Special case: empty value
         if (!$str) return [];
 
-        return explode($separator, $str);
+        $values = explode($separator, $str);
+
+        return array_map(function ($item) {
+            return trim($item);
+        }, $values);
+
     }
 }
