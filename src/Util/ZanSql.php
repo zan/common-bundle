@@ -8,21 +8,21 @@ use Doctrine\DBAL\Driver\Statement;
 class ZanSql
 {
     /**
-     * @param $con \Doctrine\DBAL\Connection
-     * @param string $query
-     * @param array $params
+     * Executes $query and returns an array of row data
      *
-     * @return array
+     * @param array<string,mixed> $params
+     * @return array<array<string,string>>
      */
-    public static function toArray($con, $query, $params = array())
+    public static function toArray(Connection $con, string $query, array $params = []): array
     {
         $r = self::query($con, $query, $params);
-        $rows = array();
+        $rows = [];
 
         while ($row = $r->fetch()) {
             $rows[] = $row;
         }
 
+        /** @phpstan-ignore-next-line Method Zan\CommonBundle\Util\ZanSql::toArray() should return array<array<string, string>> but returns array<int, mixed>. */
         return $rows;
     }
 
@@ -37,30 +37,29 @@ class ZanSql
      *
      * This method would return array('Jim', 'Bob')
      *
-     * @param       $con
-     * @param       $query
-     * @param array $params
-     * @return array
+     * @param array<string,mixed> $params
+     * @return array<array<string,string>>
      */
-    public static function toFlatArray($con, $query, $params = array())
+    public static function toFlatArray(Connection $con, string $query, array $params = []): array
     {
         $r = self::query($con, $query, $params);
         $results = array();
 
         while ($row = $r->fetch()) {
+            /* @phpstan-ignore-next-line Parameter #1 $array of function array_shift expects array, mixed given. */
             $results[] = array_shift($row);
         }
 
+        /** @phpstan-ignore-next-line Method Zan\CommonBundle\Util\ZanSql::toFlatArray() should return array<string> but returns array<int, mixed>. */
         return $results;
     }
 
     /**
-     * @param $con \Doctrine\DBAL\Connection
-     * @param string $query
-     * @param array $params
-     * @return mixed|null
+     * Returns the first column of the first row after executing $query
+     *
+     * @param array<string,mixed> $params
      */
-    public static function singleValue($con, $query, $params = array())
+    public static function singleValue(Connection $con, string $query, array $params = []): ?string
     {
         $r = self::query($con, $query, $params);
         $rows = [];
@@ -71,27 +70,25 @@ class ZanSql
 
         if (count($rows) == 0) return null;
 
-        $row = $rows[0];
-        foreach ($row as $key => $value) {
-            return $value;
-        }
+        /** @var array<string> $columns */
+        $columns = $rows[0];
+        if (count($columns) == 0) return null;
 
-        return null;
+        return $columns[0];
     }
 
     /**
      * Returns the first result as an array of columns -> values
      *
-     * @param       $con
-     * @param       $query
-     * @param array $params
-     * @return array
+     * @param array<string,mixed> $params
+     * @return array<string>
      */
-    public static function singleRow($con, $query, $params = array())
+    public static function singleRow(Connection $con, string $query, array $params = []): array
     {
         $r = self::query($con, $query, $params);
 
         while ($row = $r->fetch()) {
+            /* @phpstan-ignore-next-line Method Zan\CommonBundle\Util\ZanSql::singleRow() should return array but returns mixed. */
             return $row;
         }
 
@@ -99,12 +96,10 @@ class ZanSql
     }
 
     /**
-     * @param $con \Doctrine\DBAL\Connection
-     * @param string $query
-     * @param array $params
-     * @return Statement
+     * @param array<string,mixed> $params
+     * @return Statement<mixed>
      */
-    public static function query($con, $query, $params = array())
+    public static function query(Connection $con, string $query, array $params = []): Statement
     {
         $stmt = $con->prepare($query);
         $stmt->execute($params);
@@ -129,36 +124,13 @@ class ZanSql
                 ->setParameter('query', ZanSql::escapeLikeParameter($query));
             }
      *
-     * @param        $value
-     * @param string $prefix
-     * @param string $postfix
-     * @return string
      */
-    public static function escapeLikeParameter($value, $prefix = '%', $postfix = '%')
+    public static function escapeLikeParameter(string $value, string $prefix = '%', string $postfix = '%'): string
     {
         // ensure special characters % and _ are escaped
         $escapedValue = addcslashes($value, '%_');
 
         return sprintf('%s%s%s', $prefix, $escapedValue, $postfix);
-    }
-
-    /**
-     * Returns a string describing the version of the database software.
-     *
-     * If a version cannot be determined this method returns null.
-     *
-     * @param $con \Doctrine\DBAL\Connection
-     * @return string|null
-     */
-    public static function getServerVersion($con)
-    {
-        // MySQL
-        if (ZanString::startsWithi('mysql', $con->getDatabasePlatform()->getName())) {
-            return self::singleValue($con, 'select @@version');
-        }
-
-        // Unsupported database
-        return null;
     }
 
     /**
@@ -188,10 +160,11 @@ class ZanSql
             ZanSql::query($con, $sql, $setInfo['parameters']);
      *
      *
-     * @param $fields
-     * @return array
+     * @param array<string, mixed> $fields
+     * @param array<string> $extraQueryParts
+     * @return array<string, mixed>
      */
-    public static function buildSetInfoFromMap($fields, $extraQueryParts = [])
+    public static function buildSetInfoFromMap(array $fields, array $extraQueryParts = []): array
     {
         $setInfo = [
             'query' => '',
@@ -219,11 +192,9 @@ class ZanSql
      * NOTE that this method handles escaping the individual elements so you should
      *  not do additional escaping or bind them to a parameter.
      *
-     * @param            $array
-     * @param Connection $con
-     * @return string
+     * @param array<string> $array
      */
-    public static function inFromArray($array, Connection $con)
+    public static function inFromArray(array $array, Connection $con): string
     {
         $inParts = [];
 
@@ -232,36 +203,5 @@ class ZanSql
         }
 
         return join(', ', $inParts);
-    }
-
-    /**
-     * Returns true if a table with name $needle exists in the database represented
-     * by $con
-     *
-     * NOTE: Assumes that the first element returned by getListTablesSQL is the
-     *  table name. This may not be cross platform!
-     *
-     * @param Connection $con
-     * @param            $needle
-     * @return bool
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public static function tableExists(Connection $con, $needle)
-    {
-        $tables = $con->fetchAll($con->getDatabasePlatform()->getListTablesSQL());
-
-        $matches = array_filter($tables, function($tableArr) use ($needle) {
-            /*
-             * $tableArr has keys like:
-             *  Tables_in_<database name>
-             *  Table_type
-             *
-             * Since <database name> is dynamic, use array_shift to grab the first element
-             */
-            $currTableName = array_shift($tableArr);
-            return $currTableName === $needle;
-        });
-
-        return count($matches) != 0;
     }
 }
