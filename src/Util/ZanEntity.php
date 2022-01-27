@@ -29,6 +29,12 @@ class ZanEntity
         // exact object matches are always equal
         if ($a === $b) return true;
 
+        // Objects of different classes are never equal
+        if (get_class($a) !== get_class($b)) return false;
+
+        // Verify that objects have getId() methods
+        if (!method_exists($a, 'getId') || !method_exists($b, 'getId')) throw new \InvalidArgumentException('ZanEntity::isSame requires that objects implement getId');
+
         // empty IDs are never equal (including 0 since this should never be a database ID)
         if (!$a->getId() || !$b->getId()) return false;
 
