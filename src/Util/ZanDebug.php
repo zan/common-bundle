@@ -4,7 +4,10 @@ namespace Zan\CommonBundle\Util;
 
 class ZanDebug
 {
-    public static function dump($args)
+    /**
+     * @param mixed $args
+     */
+    public static function dump($args): void
     {
         // Silently exit if dump() is not a function
         if (!function_exists('dump')) return;
