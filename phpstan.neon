@@ -1,0 +1,7 @@
+parameters:
+    level: max
+    paths:
+        - src
+    # https://phpstan.org/config-reference#vague-typehints
+    # Primarily for reflection helpers in ZanObject.php
+    checkGenericClassInNonGenericObjectType: false
