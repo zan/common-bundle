@@ -19,6 +19,18 @@ class ZanString
     }
 
     /**
+     * Returns $string with $postfix removed
+     */
+    public static function removePostfix(?string $string, ?string $postfix): ?string
+    {
+        if (self::endsWith($string, $postfix)) {
+            $string = substr($string, 0, 0 - strlen($postfix));
+        }
+
+        return $string;
+    }
+
+    /**
      * Returns true if $haystack ends with $needle
      */
     public static function endsWith(?string $haystack, string $needle): bool
