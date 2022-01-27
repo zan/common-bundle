@@ -4,7 +4,6 @@ namespace Zan\CommonBundle\Util;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Statement;
-use Zan\CoreBundle\Util\ZanString;
 
 class ZanSql
 {
