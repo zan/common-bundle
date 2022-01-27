@@ -10,8 +10,10 @@ class RequestUtils
 {
     /**
      * todo: needs tests and docs
+     *
+     * @return array<string>
      */
-    public static function getParameters(Request $request)
+    public static function getParameters(Request $request): array
     {
         // Special case: PHP does not support standard CGI array syntax:
         //      http://example.com?fields=one&fields=two&fields=three
