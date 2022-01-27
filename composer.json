@@ -15,5 +15,8 @@
     "psr-4": {
       "Zan\\CommonBundle\\Tests\\": "tests/"
     }
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^1.4"
   }
 }
