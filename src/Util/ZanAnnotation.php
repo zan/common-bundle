@@ -12,14 +12,10 @@ class ZanAnnotation
     /**
      * Returns true if the annotation is present
      *
-     * @param Reader $annotationReader
-     * @param        $annotationNamespace
-     * @param        $annotatedClassNamespace
-     * @param        $property
-     * @return bool
-     * @throws \ErrorException
+     * @param class-string $annotationNamespace
+     * @param class-string $annotatedClassNamespace
      */
-    public static function hasPropertyAnnotation(Reader $annotationReader, $annotationNamespace, $annotatedClassNamespace, $property)
+    public static function hasPropertyAnnotation(Reader $annotationReader, string $annotationNamespace, string $annotatedClassNamespace, string $property): bool
     {
         try {
             $refProperty = ZanObject::getProperty($annotatedClassNamespace, $property);
@@ -32,37 +28,44 @@ class ZanAnnotation
 
         return ($annotation !== null);
     }
+
     /**
-     * @param Reader $annotationReader
-     * @param        $annotationNamespace
-     * @param        $annotatedClassNamespace
-     * @return null|Annotation
+     * @param class-string $annotationNamespace
+     * @param class-string $annotatedClassNamespace
      */
-    public static function getClassAnnotation(Reader $annotationReader, $annotationNamespace, $annotatedClassNamespace)
+    public static function getClassAnnotation(Reader $annotationReader, string $annotationNamespace, string $annotatedClassNamespace): ?Annotation // @phpstan-ignore-line so it's not necessary to have doctrine/orm as a requirement
     {
         $refClass = new \ReflectionClass($annotatedClassNamespace);
 
         $annotation = $annotationReader->getClassAnnotation($refClass, $annotationNamespace);
 
-        return $annotation;
+        return $annotation; // @phpstan-ignore-line
     }
 
     /**
-     * NOTE: This method only works for annotatinos with a getValue() method
+     * NOTE: This method only works for annotations with a getValue() method
      *
-     * @param Reader $annotationReader
-     * @param        $annotationNamespace
-     * @param        $annotatedClassNamespace
+     * @param class-string $annotationNamespace
+     * @param class-string $annotatedClassNamespace
+     *
      * @return mixed
      */
-    public static function getClassAnnotationValue(Reader $annotationReader, $annotationNamespace, $annotatedClassNamespace)
+    public static function getClassAnnotationValue(Reader $annotationReader, string $annotationNamespace, string $annotatedClassNamespace)
     {
         $annotation = self::getClassAnnotation($annotationReader, $annotationNamespace, $annotatedClassNamespace);
 
-        return ($annotation) ? $annotation->getValue() : null;
+        if (!$annotation) return null;
+
+        if (!method_exists($annotation, 'getValue')) throw new \InvalidArgumentException('Annotation must implement getValue()');
+
+        return $annotation->getValue(); // @phpstan-ignore-line
     }
 
-    public static function hasClassAnnotation(Reader $annotationReader, $annotationNamespace, $annotatedClassNamespace): bool
+    /**
+     * @param class-string $annotationNamespace
+     * @param class-string $annotatedClassNamespace
+     */
+    public static function hasClassAnnotation(Reader $annotationReader, string $annotationNamespace, string $annotatedClassNamespace): bool
     {
         return null !== self::getClassAnnotation($annotationReader, $annotationNamespace, $annotatedClassNamespace);
     }
