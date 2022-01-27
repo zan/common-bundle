@@ -42,4 +42,12 @@ class ZanString
 
         return (strrpos($haystack, $needle) === strlen($haystack) - strlen($needle));
     }
+
+    /**
+     * Case-insensitive str_starts_with
+     */
+    public static function startsWithi(?string $haystack, string $needle): bool
+    {
+        return str_starts_with(strtolower($haystack), strtolower($needle));
+    }
 }
