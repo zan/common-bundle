@@ -23,6 +23,8 @@ class ZanString
      */
     public static function removePostfix(?string $string, ?string $postfix): ?string
     {
+        if (!$string || !$postfix) return $string;
+
         if (self::endsWith($string, $postfix)) {
             $string = substr($string, 0, 0 - strlen($postfix));
         }
@@ -33,9 +35,9 @@ class ZanString
     /**
      * Returns true if $haystack ends with $needle
      */
-    public static function endsWith(?string $haystack, string $needle): bool
+    public static function endsWith(?string $haystack, ?string $needle): bool
     {
-        if (!$haystack) return false;
+        if (!$haystack || !$needle) return false;
 
         $strpos = strrpos($haystack, $needle);
         if ($strpos === false) return false;
@@ -46,8 +48,10 @@ class ZanString
     /**
      * Case-insensitive str_starts_with
      */
-    public static function startsWithi(?string $haystack, string $needle): bool
+    public static function startsWithi(?string $haystack, ?string $needle): bool
     {
+        if (!$haystack || !$needle) return false;
+
         return str_starts_with(strtolower($haystack), strtolower($needle));
     }
 }
