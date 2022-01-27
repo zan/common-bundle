@@ -6,7 +6,8 @@
   "require": {
     "php": ">=7.1",
     "symfony/http-foundation": "^6.0",
-    "symfony/http-kernel": "^6.0"
+    "symfony/http-kernel": "^6.0",
+    "doctrine/annotations": "^1.13"
   },
   "autoload": {
     "psr-4": {
