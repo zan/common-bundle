@@ -5,11 +5,11 @@
   "license": "MIT",
   "require": {
     "php": ">=8.0",
-    "symfony/http-foundation": "^6.0",
-    "symfony/http-kernel": "^6.0",
+    "symfony/http-foundation": "^5.4",
+    "symfony/http-kernel": "^5.4",
     "doctrine/annotations": "^1.13",
     "doctrine/dbal": ">=2.10.2",
-    "symfony/dependency-injection": "^6.0"
+    "symfony/dependency-injection": "^5.4"
   },
   "autoload": {
     "psr-4": {
