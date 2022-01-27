@@ -10,12 +10,12 @@ class ZanObject
      * Returns all properties on an object including ones inherited from parent
      * classes.
      *
-     * @param $object
+     * @param null|class-string|object $object
      * @return array|\ReflectionMethod[]
      */
-    public static function getMethods($object)
+    public static function getMethods(null|string|object $object)
     {
-        if (!$object) return [];
+        if (null === $object) return [];
 
         $methods = [];
 
@@ -40,13 +40,11 @@ class ZanObject
 
     /**
      * Returns true if $object has $methodName on itself or any parent classes
-     *
-     * @param $object
-     * @param $methodName
-     * @return bool
      */
-    public static function hasMethod($object, $methodName)
+    public static function hasMethod(?object $object, string $methodName): bool
     {
+        if (null === $object) return false;
+
         $methods = self::getMethods($object);
 
         foreach ($methods as $foundMethod) {
@@ -62,8 +60,10 @@ class ZanObject
      * Returns the specified property of an object
      *
      * This method will traverse parent classes and return inherited properties
+     *
+     * @param object|class-string $refObject
      */
-    public static function getProperty(object|string $refObject, string $property)
+    public static function getProperty(object|string $refObject, string $property): \ReflectionProperty
     {
         if (!$refObject instanceof \ReflectionClass) {
             $refObject = new \ReflectionClass($refObject);
@@ -86,11 +86,14 @@ class ZanObject
     }
 
     /**
+     * @param null|class-string|\ReflectionClass $object
      * @return array<\ReflectionProperty>
      */
-    public static function getProperties(string|\ReflectionClass $object)
+    public static function getProperties(null|string|\ReflectionClass $object)
     {
-        $properties = array();
+        if (null === $object) return [];
+
+        $properties = [];
 
         if ($object instanceof \ReflectionClass) {
             $refClass = $object;
@@ -136,7 +139,7 @@ class ZanObject
             $propertyName = $propertyName->getName();
         }
 
-        // Property is nested, get top-leve property and then recurse below
+        // Property is nested, get top-level property and then recurse below
         if (false !== stristr($propertyName, '.')) {
             $isNested = true;
             $parts = explode('.', $propertyName);
@@ -148,7 +151,9 @@ class ZanObject
         if ($useGetter) {
             $getterMethod = sprintf("get" . ucfirst($propertyName));
             if (self::hasMethod($object, $getterMethod)) {
-                $value = call_user_func([$object, $getterMethod]);
+                $getterFn = [$object, $getterMethod];
+                if (!is_callable($getterFn)) throw new \LogicException('Method is not callable');
+                $value = call_user_func($getterFn);
             }
             else {
                 // set $useGetter to false so we fall back to accessing property
@@ -172,6 +177,7 @@ class ZanObject
 
         // If it's nested recursively call with one level down
         if ($isNested) {
+            if (!is_object($value)) throw new \LogicException('Attempted to recurse into a non-object');
             return self::getPropertyValue($value, $remainingProperties, $useGetter);
         }
         // No remaining properties, return the property on the current object
@@ -188,22 +194,22 @@ class ZanObject
      *
      * This method returns true if the setter was found or false otherwise
      *
-     * @param $object
-     * @param $propertyName
-     * @param $value
-     * @return bool
+     * @param class-string|object $object
      */
-    public static function setProperty($object, $propertyName, $value)
+    public static function setProperty(string|object $object, string $propertyName, mixed $value): bool
     {
         // Determine the setter to use
-        $setterFn = sprintf("set%s", ucfirst($propertyName));
+        $setterName = sprintf("set%s", ucfirst($propertyName));
 
         // Make sure the setter is valid
-        if (!self::hasPublicMethod($object, $setterFn)) {
+        if (!self::hasPublicMethod($object, $setterName)) {
             return false;
         }
 
-        call_user_func(array($object, $setterFn), $value);
+        $setterFn = [$object, $setterName];
+        if (!is_callable($setterFn)) throw new \LogicException('Setter was not callable');
+
+        call_user_func($setterFn, $value);
 
         return true;
     }
@@ -212,11 +218,9 @@ class ZanObject
      * Returns true if $object has $methodName on itself or any parent classes
      * and the method is public.
      *
-     * @param $object
-     * @param $methodName
-     * @return bool
+     * @param class-string|object $object
      */
-    public static function hasPublicMethod($object, $methodName)
+    public static function hasPublicMethod(string|object $object, string $methodName): bool
     {
         $methods = self::getMethods($object);
 
@@ -230,11 +234,10 @@ class ZanObject
     }
 
     /**
-     * @param $object
+     * @param class-string|object $object
      * @return \ReflectionParameter[]
-     * @throws \ReflectionException
      */
-    public static function getRequiredConstructorArguments($object)
+    public static function getRequiredConstructorArguments(string|object $object): array
     {
         $class = new \ReflectionClass($object);
         $constructor = $class->getConstructor();
@@ -242,9 +245,6 @@ class ZanObject
         // Early exit if there isn't a constructor
         if (!$constructor) return [];
 
-        /**
-         * Array of ...
-         */
         $required = [];
         foreach ($constructor->getParameters() as $parameter) {
             // Only interested in required ones
