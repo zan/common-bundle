@@ -29,3 +29,6 @@ jobs:
 
       - name: Run test suite
         run: composer run-script test
+
+      - name: Run code quality checks (phpstan, etc.)
+        run: composer run-script code-quality
