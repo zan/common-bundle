@@ -5,7 +5,6 @@ namespace Zan\CommonBundle\Util;
 
 
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\ORM\Mapping\Annotation;
 
 class ZanAnnotation
 {
@@ -32,8 +31,10 @@ class ZanAnnotation
     /**
      * @param class-string $annotationNamespace
      * @param class-string $annotatedClassNamespace
+     *
+     * @return mixed
      */
-    public static function getClassAnnotation(Reader $annotationReader, string $annotationNamespace, string $annotatedClassNamespace): ?Annotation // @phpstan-ignore-line so it's not necessary to have doctrine/orm as a requirement
+    public static function getClassAnnotation(Reader $annotationReader, string $annotationNamespace, string $annotatedClassNamespace)
     {
         $refClass = new \ReflectionClass($annotatedClassNamespace);
 
