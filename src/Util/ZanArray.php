@@ -31,4 +31,20 @@ class ZanArray
         }, $values);
 
     }
+
+    /**
+     * Returns true if $array is a "real" array with 0-based incrementing integer keys (as opposed to a key=>value map)
+     */
+    public static function isNotMap(array $array): bool
+    {
+        $expectedKey = 0;
+        foreach ($array as $key => $value) {
+            // Not a 0-based increasing key, so not an indexed array
+            if ($key !== $expectedKey) return false;
+            $expectedKey++;
+        }
+
+        // Keys started at 0 and kept increasing, it is a normal array and not a map
+        return true;
+    }
 }
