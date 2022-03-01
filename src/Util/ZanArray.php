@@ -34,6 +34,8 @@ class ZanArray
 
     /**
      * Returns true if $array is a "real" array with 0-based incrementing integer keys (as opposed to a key=>value map)
+     *
+     * @param mixed[] $array
      */
     public static function isNotMap(array $array): bool
     {

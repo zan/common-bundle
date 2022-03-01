@@ -32,7 +32,7 @@ class ZanAnnotation
      * @param class-string $annotationNamespace
      * @param class-string $annotatedClassNamespace
      *
-     * @return mixed
+     * @return object|string|null
      */
     public static function getClassAnnotation(Reader $annotationReader, string $annotationNamespace, string $annotatedClassNamespace)
     {
@@ -40,7 +40,7 @@ class ZanAnnotation
 
         $annotation = $annotationReader->getClassAnnotation($refClass, $annotationNamespace);
 
-        return $annotation; // @phpstan-ignore-line
+        return $annotation;
     }
 
     /**
