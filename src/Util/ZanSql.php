@@ -3,7 +3,8 @@
 namespace Zan\CommonBundle\Util;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\Statement;
+use Doctrine\DBAL\Result;
+use Doctrine\DBAL\Statement;
 
 class ZanSql
 {
@@ -18,7 +19,7 @@ class ZanSql
         $r = self::query($con, $query, $params);
         $rows = [];
 
-        while ($row = $r->fetch()) {
+        while ($row = $r->fetchAssociative()) {
             $rows[] = $row;
         }
 
@@ -45,8 +46,7 @@ class ZanSql
         $r = self::query($con, $query, $params);
         $results = array();
 
-        while ($row = $r->fetch()) {
-            /* @phpstan-ignore-next-line Parameter #1 $array of function array_shift expects array, mixed given. */
+        while ($row = $r->fetchAssociative()) {
             $results[] = array_shift($row);
         }
 
@@ -64,7 +64,7 @@ class ZanSql
         $r = self::query($con, $query, $params);
         $rows = [];
 
-        while ($row = $r->fetch()) {
+        while ($row = $r->fetchAssociative()) {
             $rows[] = $row;
         }
 
@@ -87,7 +87,7 @@ class ZanSql
     {
         $r = self::query($con, $query, $params);
 
-        while ($row = $r->fetch()) {
+        while ($row = $r->fetchAssociative()) {
             /* @phpstan-ignore-next-line Method Zan\CommonBundle\Util\ZanSql::singleRow() should return array but returns mixed. */
             return $row;
         }
@@ -97,14 +97,12 @@ class ZanSql
 
     /**
      * @param array<string,mixed> $params
-     * @return Statement<mixed>
      */
-    public static function query(Connection $con, string $query, array $params = []): Statement
+    public static function query(Connection $con, string $query, array $params = []): Result
     {
         $stmt = $con->prepare($query);
-        $stmt->execute($params);
 
-        return $stmt;
+        return $stmt->executeQuery($params);
     }
 
     /**
