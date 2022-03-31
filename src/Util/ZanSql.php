@@ -74,7 +74,7 @@ class ZanSql
         $columns = $rows[0];
         if (count($columns) == 0) return null;
 
-        return $columns[0];
+        return array_shift($columns);
     }
 
     /**
