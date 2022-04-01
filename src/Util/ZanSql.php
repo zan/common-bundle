@@ -57,7 +57,7 @@ class ZanSql
     /**
      * Returns the first column of the first row after executing $query
      *
-     * @param array<string,mixed> $params
+     * @param array<string|int,mixed> $params
      */
     public static function singleValue(Connection $con, string $query, array $params = []): ?string
     {
