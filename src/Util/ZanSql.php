@@ -96,7 +96,7 @@ class ZanSql
     }
 
     /**
-     * @param array<string,mixed> $params
+     * @param array<int|string,mixed> $params
      */
     public static function query(Connection $con, string $query, array $params = []): Result
     {
