@@ -15,7 +15,7 @@ class ZanArray
      * @param non-empty-string $separator
      * @return array<string>
      */
-    public static function createFromString(null|string|array $str, string $separator = ","): array
+    public static function createFromString(null|string|array $str, string $separator = ",", bool $enableJsonSupport = true): array
     {
         // Special case: already an array
         // @phpstan-ignore-next-line
@@ -23,6 +23,12 @@ class ZanArray
 
         // Special case: empty value
         if (!$str) return [];
+
+        // Special case: first character is a "[" and it's valid json
+        if ($enableJsonSupport && ZanString::startsWithi($str, '[')) {
+            $decoded = json_decode($str, true);
+            if (is_array($decoded)) return $decoded;
+        }
 
         $values = explode($separator, $str);
 
