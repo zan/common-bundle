@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Util;
+namespace Zan\CommonBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
 use Zan\CommonBundle\Util\ZanArray;
