@@ -9,11 +9,31 @@ use Symfony\Component\HttpFoundation\Request;
 class RequestUtils
 {
     /**
-     * todo: needs tests and docs
+     * Returns the parameters in the query string of $request as an array
+     *
+     * See getParametersFromQueryString() for more details on why this exists
      *
      * @return array<string>
      */
     public static function getParameters(Request $request): array
+    {
+        // Doesn't work in sf5
+        //$queryString = $request->getQueryString();
+        $queryString = $_SERVER['QUERY_STRING'];
+
+        return static::getParametersFromQueryString($queryString);
+    }
+
+    /**
+     * Parses parameters from a query string and adds support for cgi-style arrays (represented by repeated names)
+     *
+     * For example, ?myVal=one&myVal=two should parse as myVal being an array with two elements ['one', 'two']
+     *
+     * By default, PHP parses myVal as a string with value 'two'
+     *
+     * @return array<string>
+     */
+    public static function getParametersFromQueryString(string $queryString): array
     {
         // Special case: PHP does not support standard CGI array syntax:
         //      http://example.com?fields=one&fields=two&fields=three
@@ -27,21 +47,10 @@ class RequestUtils
         //      becomes
         //      http://example.com?fields[]=one&fields[]=two&fields[]=three
 
-        // Doesn't work in sf5
-        //$queryString = $request->getQueryString();
-        $queryString = $_SERVER['QUERY_STRING'];
+        // Find duplicate parameter names that need to be converted to name[] syntax
+        $toFix = static::getToFix($queryString);
 
-        // First, parse as normal
-        $defaultParsing = [];
-        parse_str($queryString, $defaultParsing);
-
-        $toFix = [];
-        foreach ($defaultParsing as $key => $value) {
-            if (substr_count($queryString, $key) > 1) {
-                $toFix[] = $key;
-            }
-        }
-
+        // Loop through the query string and insert correct array syntax so parse_str can be used below
         $buffer = [];
         $chars = str_split($queryString);
         $finStr = '';
@@ -59,6 +68,7 @@ class RequestUtils
                     $finStr .= $paramName . '=';
                     $buffer = [];
                     $state = 'LOOKING_AMPERSAND';
+                    $foundParamNames[] = $paramName;
                     continue;
                 }
                 else {
@@ -82,5 +92,50 @@ class RequestUtils
         parse_str($finStr, $fixedParams);
 
         return $fixedParams;
+    }
+
+    /**
+     * Looks through $queryString and extracts all parameter names
+     *
+     * @return array<string>
+     */
+    protected static function getToFix(string $queryString): array
+    {
+        $seenNames = [];
+        $toFix = [];
+
+        $buffer = [];
+        $chars = str_split($queryString);
+        $state = 'LOOKING_EQUALS';
+        foreach ($chars as $char) {
+            $currChar = $char;
+            if ('LOOKING_EQUALS' == $state) {
+                // Found an =, this means end of the parameter name
+                if ($currChar == '=') {
+                    $paramName = join('', $buffer);
+
+                    if (array_key_exists($paramName, $seenNames)) {
+                        $toFix[] = $paramName;
+                    }
+
+                    $state = 'LOOKING_AMPERSAND';
+                    $seenNames[$paramName] = true;
+                    continue;
+                }
+                else {
+                    $buffer[] = $char;
+                }
+            }
+            if ('LOOKING_AMPERSAND' == $state) {
+                $buffer[] = $char;
+                if ($currChar == '&') {
+                    $state = 'LOOKING_EQUALS';
+                    $buffer = [];
+                    continue;
+                }
+            }
+        }
+
+        return $toFix;
     }
 }
