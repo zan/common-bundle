@@ -18,8 +18,8 @@ class RequestUtils
     public static function getParameters(Request $request): array
     {
         // Doesn't work in sf5
-        //$queryString = $request->getQueryString();
-        $queryString = $_SERVER['QUERY_STRING'];
+        // Prefer QUERY_STRING since getQueryString() doesn't work in sf5
+        $queryString = $_SERVER['QUERY_STRING'] ?? $request->getQueryString() ?? '';
 
         return static::getParametersFromQueryString($queryString);
     }
