@@ -86,7 +86,8 @@ class ZanObject
     }
 
     /**
-     * @param null|class-string|\ReflectionClass $object
+     * @template T of object
+     * @param null|class-string<T>|\ReflectionClass<T> $object
      * @return array<\ReflectionProperty>
      */
     public static function getProperties(null|string|\ReflectionClass $object)

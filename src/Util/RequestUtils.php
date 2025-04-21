@@ -13,7 +13,7 @@ class RequestUtils
      *
      * See getParametersFromQueryString() for more details on why this exists
      *
-     * @return array<string>
+     * @return mixed[]
      */
     public static function getParameters(Request $request): array
     {
@@ -31,7 +31,7 @@ class RequestUtils
      *
      * By default, PHP parses myVal as a string with value 'two'
      *
-     * @return array<string>
+     * @return mixed[]
      */
     public static function getParametersFromQueryString(string $queryString): array
     {
@@ -68,7 +68,6 @@ class RequestUtils
                     $finStr .= $paramName . '=';
                     $buffer = [];
                     $state = 'LOOKING_AMPERSAND';
-                    $foundParamNames[] = $paramName;
                     continue;
                 }
                 else {
